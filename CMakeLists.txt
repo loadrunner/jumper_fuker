@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
 
-set(APP_NAME MyGame)
+set(APP_NAME jumper_fucker)
 project (${APP_NAME})
 
 include(cocos2d/build/BuildHelpers.CMakeLists.txt)
@@ -55,20 +55,25 @@ set(ARCH_DIR "32-bit")
 endif()
 
 if( UNIX ) #assume linux
-set(GAME_SRC
+set(PLATFORM_SRC
   proj.linux/main.cpp
-  Classes/AppDelegate.cpp
-  Classes/HelloWorldScene.cpp
 )
 elseif ( WIN32 )
-set(GAME_SRC
+set(PLATFORM_SRC
   proj.win32/main.cpp
   proj.win32/main.h
   proj.win32/resource.h
-  Classes/AppDelegate.cpp
-  Classes/HelloWorldScene.cpp
 )
 endif()
+
+set(GAME_SRC
+  Classes/AppDelegate.cpp
+  Classes/Loader.cpp
+  Classes/LoadingScene.cpp
+  Classes/IntroScene.cpp
+  Classes/GameScene.cpp
+  ${PLATFORM_SRC}
+)
 
 set(COCOS2D_ROOT ${CMAKE_SOURCE_DIR}/cocos2d)
 if (WIN32)
