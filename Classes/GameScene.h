@@ -9,7 +9,7 @@
 #include "Terrain.h"
 #include "Hero.h"
 
-class GameScene : public cocos2d::Layer
+class GameScene : public cocos2d::Layer, public b2ContactListener
 {
 public:
 	// there's no 'id' in cpp, so we recommend returning the class instance pointer
@@ -20,6 +20,9 @@ public:
 	
 	virtual void draw(cocos2d::Renderer *renderer, const cocos2d::Mat4 &transform, uint32_t flags) override;
 	void onKeyReleased(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event* event);
+	
+	void BeginContact(b2Contact* contact);
+	void EndContact(b2Contact* contact);
 	
 	CREATE_FUNC(GameScene);
 	

@@ -2,6 +2,9 @@
 
 USING_NS_CC;
 
+float jumpCooldown = 0;
+int nrContacts = 0;
+
 Scene* GameScene::createScene()
 {
 	// 'scene' is an autorelease object
@@ -51,6 +54,9 @@ bool GameScene::init()
 	
 	SpriteFrameCache* frameCache = Loader::getFrameCache();
 	
+	jumpCooldown = 0;
+	nrContacts = 0;
+	
 //	mBackgroundSpriteBatch = SpriteBatchNode::createWithTexture(frameCache->spriteFrameByName("bg0000.png")->getTexture());
 //	this->addChild(mBackgroundSpriteBatch);
 	
@@ -59,7 +65,8 @@ bool GameScene::init()
 	mTapDown = false;
 	
 	//                    ---  gravity --- 
-	mWorld = new b2World(b2Vec2(0.0f, -15.0f));
+	mWorld = new b2World(b2Vec2(0.0f, -25.0f));
+	mWorld->SetContactListener(this);
 	
 	mTerrain = new Terrain();
 	mTerrain->initWithWorld(mWorld);
@@ -90,6 +97,11 @@ bool GameScene::init()
 
 void GameScene::update(float dt)
 {
+	if (jumpCooldown > 0)
+	{
+		jumpCooldown -= dt;
+	}
+	
 	if (mTapDown)
 	{
 		if (!mHero->getAwake())
@@ -202,9 +214,19 @@ bool GameScene::onTouchBegan(cocos2d::Touch* touch, cocos2d::Event* event)
 {
 	cocos2d::log("You touched %f, %f", touch->getLocationInView().x, touch->getLocationInView().y);
 	
-	mTapDown = true;
-	mHero->runForceAnimation();
-	
+	if (touch->getLocation().x > 50)
+	{
+		mTapDown = true;
+		mHero->runForceAnimation();
+	}
+	else
+	{
+		if (jumpCooldown <= 0 && nrContacts > 0)
+		{
+			mHero->jump();
+			jumpCooldown = 1;
+		}
+	}
 	return true;
 }
 
@@ -218,8 +240,11 @@ void GameScene::onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event)
 {
 	cocos2d::log("You released %f, %f", touch->getLocationInView().x, touch->getLocationInView().y);
 	
-	mHero->runNormalAnimation();
-	mTapDown = false;
+	if (mTapDown)
+	{
+		mHero->runNormalAnimation();
+		mTapDown = false;
+	}
 }
 
 void GameScene::onKeyReleased(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event* event)
@@ -228,6 +253,38 @@ void GameScene::onKeyReleased(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::
 	if (keyCode == cocos2d::EventKeyboard::KeyCode::KEY_ESCAPE)
 	{
 		exitGame();
+	}
+}
+
+void GameScene::BeginContact(b2Contact* contact) {
+	void* fixtureUserData = contact->GetFixtureA()->GetUserData();
+	if (fixtureUserData == (void*) 3)
+	{
+		nrContacts++;
+	//	cocos2d::log("contact a %d", nrContacts);
+	}
+	
+	fixtureUserData = contact->GetFixtureB()->GetUserData();
+	if (fixtureUserData == (void*) 3)
+	{
+		nrContacts++;
+	//	cocos2d::log("contact b %d", nrContacts);
+	}
+}
+
+void GameScene::EndContact(b2Contact* contact) {
+	void* fixtureUserData = contact->GetFixtureA()->GetUserData();
+	if (fixtureUserData == (void*) 3)
+	{
+		nrContacts--;
+	//	cocos2d::log("uncontact a %d", nrContacts);
+	}
+	
+	fixtureUserData = contact->GetFixtureB()->GetUserData();
+	if (fixtureUserData == (void*) 3)
+	{
+		nrContacts--;
+	//	cocos2d::log("uncontact b %d", nrContacts);
 	}
 }
 

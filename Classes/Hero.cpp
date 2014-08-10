@@ -23,7 +23,15 @@ void Hero::createBody()
 	fd.density=1.0f;
 	fd.restitution=0.0f;//bouncy
 	fd.friction=0.05;
-	_body->CreateFixture(&fd);
+	/*b2Fixture* fsf = */_body->CreateFixture(&fd);
+	//fsf->SetUserData((void*)3);
+	
+	b2PolygonShape polygonShape;
+	polygonShape.SetAsBox(0.4f, 0.2f, b2Vec2(0, -radius/4), 0);
+	fd.shape = &polygonShape;
+	fd.isSensor = true;
+	b2Fixture* fsf = _body->CreateFixture(&fd);
+	fsf->SetUserData((void*)3);
 }
 
 bool Hero::initWithWorld(b2World *world)
@@ -85,7 +93,12 @@ void Hero::wake()
 
 void Hero::dive()
 {
-	_body->ApplyForce(b2Vec2(25, -90), _body->GetPosition(), true);
+	_body->ApplyForce(b2Vec2(35, -125), _body->GetPosition(), true);
+}
+
+void Hero::jump()
+{
+	_body->ApplyLinearImpulse(b2Vec2(7, 12), _body->GetPosition(), true);
 }
 
 void Hero::limitVelocity()
@@ -95,7 +108,7 @@ void Hero::limitVelocity()
 		return;
 	}
 	
-	const float minVelocityX = 2;
+	const float minVelocityX = 3;
 	const float minVelocityY = -200;
 	b2Vec2 vel = _body->GetLinearVelocity();
 	
@@ -131,4 +144,3 @@ void Hero::nodive()
 {
 	runNormalAnimation();
 }
-

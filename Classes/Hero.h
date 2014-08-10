@@ -24,6 +24,7 @@ public:
 	void update();
 	void wake();
 	void dive();
+	void jump();
 	void limitVelocity();
 	bool getAwake() { return _awake; }
 	bool setAwake(bool awake) { _awake = awake; }
