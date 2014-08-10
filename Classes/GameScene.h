@@ -2,8 +2,12 @@
 #define __GAMESCENE_H__
 
 #include "cocos2d.h"
-#include "Loader.h"
+#include "Box2D/Box2D.h"
 #include "SimpleAudioEngine.h"
+
+#include "Loader.h"
+#include "Terrain.h"
+#include "Hero.h"
 
 class GameScene : public cocos2d::Layer
 {
@@ -23,6 +27,11 @@ private:
 	cocos2d::Size mScreenSize;
 	cocos2d::Size mVisibleSize;
 	cocos2d::Vec2 mOrigin;
+	
+	Terrain* mTerrain;
+	b2World* mWorld;
+	Hero* mHero;
+	bool mTapDown;
 	
 //	cocos2d::Vector<Obstacle*> mObstacles;
 	

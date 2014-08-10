@@ -6,7 +6,7 @@ project (${APP_NAME})
 include(cocos2d/build/BuildHelpers.CMakeLists.txt)
 
 option(USE_CHIPMUNK "Use chipmunk for physics library" ON)
-option(USE_BOX2D "Use box2d for physics library" OFF)
+option(USE_BOX2D "Use box2d for physics library" ON)
 option(DEBUG_MODE "Debug or release?" ON)
 
 if(DEBUG_MODE)
@@ -31,21 +31,21 @@ elseif (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
 
 endif()
 
-if(USE_CHIPMUNK)
-  message("Using chipmunk ...")
-  add_definitions(-DCC_ENABLE_CHIPMUNK_INTEGRATION=1)
-  if(UNIX) # assuming linux
-    add_definitions(-DLINUX )
-  endif()
-elseif(USE_BOX2D)
+if(USE_BOX2D)
   message("Using box2d ...")
   add_definitions(-DCC_ENABLE_BOX2D_INTEGRATION=1)
   if(UNIX) # assuming linux
     add_definitions(-DLINUX )
   endif()
-else(USE_CHIPMUNK)
+elseif(USE_CHIPMUNK)
+  message("Using chipmunk ...")
+  add_definitions(-DCC_ENABLE_CHIPMUNK_INTEGRATION=1)
+  if(UNIX) # assuming linux
+    add_definitions(-DLINUX )
+  endif()
+else(USE_BOX2D)
   message(FATAL_ERROR "Must choose a physics library.")
-endif(USE_CHIPMUNK)
+endif(USE_BOX2D)
 
 # architecture
 if ( CMAKE_SIZEOF_VOID_P EQUAL 8 )
@@ -72,6 +72,9 @@ set(GAME_SRC
   Classes/LoadingScene.cpp
   Classes/IntroScene.cpp
   Classes/GameScene.cpp
+  Classes/Hero.cpp
+  Classes/Terrain.cpp
+  Classes/GLES-Render.cpp
   ${PLATFORM_SRC}
 )
 

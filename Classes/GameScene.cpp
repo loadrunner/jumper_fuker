@@ -56,6 +56,23 @@ bool GameScene::init()
 	
 	createPools();
 	
+	mTapDown = false;
+	
+	//                    ---  gravity --- 
+	mWorld = new b2World(b2Vec2(0.0f, -15.0f));
+	
+	mTerrain = new Terrain();
+	mTerrain->initWithWorld(mWorld);
+	mTerrain->autorelease();
+	mTerrain->retain();
+	this->addChild(mTerrain, 1);
+	
+	mHero = new Hero();
+	mHero->initWithWorld(mWorld);
+	mHero->autorelease();
+	mTerrain->addChild(mHero);
+	
+	
 	// Register Touch Event
 	auto dispatcher = Director::getInstance()->getEventDispatcher();
 	auto listener = EventListenerTouchOneByOne::create();
@@ -73,34 +90,56 @@ bool GameScene::init()
 
 void GameScene::update(float dt)
 {
-	/*
-	int i, n;
-	Node* target = this->hero;
-	AbstractObject* projectile;
-	cocos2d::Rect targetRect = hero->getCollisionRect();
-	
-	n = mObstacles.size();
-	for (i = 0; i < n; i++)
+	if (mTapDown)
 	{
-		projectile = mObstacles.at(i);
-		
-		if (targetRect.intersectsRect(projectile->getCollisionRect()))
+		if (!mHero->getAwake())
 		{
-			cocos2d::log("collissiosndasdas with obstacle");
-			CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("crash.ogg");
-			mHeroHitDisabled = true;
-			mHeroHitTimer = 3;
-			
-			this->hero->hit(3);
-			
-			mLives--;
-			__String * value = __String::createWithFormat("%i", mLives);
-			mLivesView->setString(value->getCString());
-			
-			break;
+			mHero->wake();
+			mTapDown = false;
+		}
+		else
+		{
+			mHero->dive();
 		}
 	}
-	*/
+	else
+	{
+		mHero->nodive();
+	}
+	
+	mHero->limitVelocity();
+	
+	//update physics world
+	static double UPDATE_INTERVAL = Director::getInstance()->getAnimationInterval();
+	static double MAX_CYCLES_PER_FRAME = 5;
+	static double timeAccumulator = 0;
+	
+	timeAccumulator += dt;
+	if (timeAccumulator > (MAX_CYCLES_PER_FRAME * UPDATE_INTERVAL))
+	{
+		timeAccumulator = UPDATE_INTERVAL;
+	}
+	
+	int32 velocityIterations = 3;
+	int32 positionIterations = 2;
+	while (timeAccumulator >= UPDATE_INTERVAL)
+	{
+		timeAccumulator -= UPDATE_INTERVAL;
+		mWorld->Step(UPDATE_INTERVAL, velocityIterations, positionIterations);
+		//mWorld->ClearForces();
+	}
+	
+	//update hero sprite
+	mHero->update();
+	
+	//world scale
+//	float scale = (mWindowSize.height * 3 / 4) / mHero->getPositionY();
+//	if (scale > 1)
+//		scale = 1;
+//	mTerrain->setScale(scale);
+	
+	//world offset
+	mTerrain->setOffset(mHero->getPositionX(), mHero->getPositionY());
 }
 /*
 void GameScene::addObstacle()
@@ -163,6 +202,9 @@ bool GameScene::onTouchBegan(cocos2d::Touch* touch, cocos2d::Event* event)
 {
 	cocos2d::log("You touched %f, %f", touch->getLocationInView().x, touch->getLocationInView().y);
 	
+	mTapDown = true;
+	mHero->runForceAnimation();
+	
 	return true;
 }
 
@@ -176,6 +218,8 @@ void GameScene::onTouchEnded(cocos2d::Touch* touch, cocos2d::Event* event)
 {
 	cocos2d::log("You released %f, %f", touch->getLocationInView().x, touch->getLocationInView().y);
 	
+	mHero->runNormalAnimation();
+	mTapDown = false;
 }
 
 void GameScene::onKeyReleased(cocos2d::EventKeyboard::KeyCode keyCode, cocos2d::Event* event)
