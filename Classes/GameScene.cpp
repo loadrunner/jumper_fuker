@@ -65,7 +65,7 @@ bool GameScene::init()
 	mTapDown = false;
 	
 	//                    ---  gravity --- 
-	mWorld = new b2World(b2Vec2(0.0f, -25.0f));
+	mWorld = new b2World(b2Vec2(0.0f, -20.0f));
 	mWorld->SetContactListener(this);
 	
 	mTerrain = new Terrain();

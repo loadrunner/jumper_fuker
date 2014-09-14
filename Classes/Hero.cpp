@@ -93,7 +93,7 @@ void Hero::wake()
 
 void Hero::dive()
 {
-	_body->ApplyForce(b2Vec2(35, -125), _body->GetPosition(), true);
+	_body->ApplyForce(b2Vec2(5, -125), _body->GetPosition(), true);
 }
 
 void Hero::jump()
